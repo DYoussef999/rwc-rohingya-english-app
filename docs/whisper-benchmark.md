@@ -26,7 +26,8 @@ time, though it is the only size that handles Rohingya at all.
 No recording exists whose correct transcript is known, which blocks every
 accuracy number. TTS gets around that: we pick the sentence, so the reference is
 exact. Sentences come from the team's phrase set
-(`ml/translation/data/rohingya_phrases_38.json`), 12 phrases x 6 macOS voices,
+(`ml/translation/data/rohingya_phrases_38.json`, since merged into
+`rohingya_phrases.json`), 12 phrases x 6 macOS voices,
 72 clips. Standard WER, punctuation and case normalised away.
 
 **Synthetic speech is clean and fluent, so absolute numbers are optimistic.**

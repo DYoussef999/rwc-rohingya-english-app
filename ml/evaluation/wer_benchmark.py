@@ -42,7 +42,7 @@ from pathlib import Path
 import numpy as np
 
 REPO = Path(os.getenv("RWC_REPO", Path.home() / "Desktop" / "rwc-rohingya-english-app"))
-PHRASES_JSON = REPO / "ml" / "translation" / "data" / "rohingya_phrases_38.json"
+PHRASES_JSON = REPO / "ml" / "translation" / "data" / "rohingya_phrases.json"
 OUT = Path(os.getenv("RWC_WER_OUT", Path.home() / "Desktop" / "voa_rhg" / "wer"))
 AUDIO = OUT / "audio"
 SR = 16000

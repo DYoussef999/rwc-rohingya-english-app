@@ -23,11 +23,11 @@ args = ap.parse_args()
 
 
 def load(path):
-    """Return [(english, rohingya or "", reverse_ok)] from a .csv or .json file."""
+    """Return [(english, rohingya or "", reverse_ok, forward_ok)] from a .csv or .json file."""
     if not path.lower().endswith(".json"):          # csv: english, rohingya, reverse
         with open(path, encoding="utf-8") as f:
             return [(r["english"].strip(), (r.get("rohingya") or "").strip(),
-                     (r.get("reverse") or "yes").strip().lower() != "no")
+                     (r.get("reverse") or "yes").strip().lower() != "no", True)
                     for r in csv.DictReader(f)]
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
@@ -39,17 +39,20 @@ def load(path):
         else:                                       # simple: {"english": ..., "rohingya": ...}
             en, roh = e["english"], e.get("rohingya")
         out.append((en.strip(), (roh or "").replace("(not verified)", "").strip(),
-                    str(e.get("reverse", "yes")).lower() != "no"))
-        # data/collections/*.json: each alternative translation must round-trip too
-        out += [(a["english"].strip(), a["rohingya"].strip(), True)
+                    str(e.get("reverse", "yes")).lower() != "no", True))
+        # Each alternative translation must round-trip too. When an alternative has the
+        # entry's own English (Goodbye -> Khoda hafiz / Allah Hafez), english->rohingya
+        # rightly returns the main form, so only rohingya->english is checked for it.
+        own = {norm(en), norm((e.get("english_meaning") or {}).get("word", ""))}
+        out += [(a["english"].strip(), a["rohingya"].strip(), True, norm(a["english"]) not in own)
                 for a in e.get("alternative_translations") or []]
     return out
 
 
 tests = [t for path in args.file for t in load(path)]
 failures, total = [], 0
-for en, roh, rev in tests:
-    runs = [("en->roh", en, roh or None)]
+for en, roh, rev, fwd in tests:
+    runs = [("en->roh", en, roh or None)] if fwd else []
     if args.reverse and roh and rev:
         runs.append(("roh->en", roh, en))
     for direction, text, want in runs:

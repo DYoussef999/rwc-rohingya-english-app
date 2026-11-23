@@ -27,7 +27,7 @@ import argparse, csv, glob, html, json, math, os, re, unicodedata
 from difflib import SequenceMatcher
 
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-FILES = [os.path.join(DATA, "rohingya_phrases_38.json")] + sorted(glob.glob(os.path.join(DATA, "collections", "*.json")))
+FILES = [os.path.join(DATA, "rohingya_phrases.json")] + sorted(glob.glob(os.path.join(DATA, "collections", "*.json")))
 CONF = {"multi_source": 0.95, "single_source": 0.70, "model_fallback": 0.40}
 FLAG_CAP = 0.50
 
@@ -235,7 +235,7 @@ def main():
     ap.add_argument("--gamayun", required=True)
     ap.add_argument("--iom", required=True)
     ap.add_argument("--file", nargs="+", default=FILES,
-                    help="phrase files to review in place (default: the 38-phrase set and every collection)")
+                    help="phrase files to review in place (default: rohingya_phrases.json and every collection)")
     args = ap.parse_args()
 
     gamayun = load_gamayun(args.gamayun)
@@ -245,6 +245,10 @@ def main():
             data = json.load(f)
         print(f"== {os.path.relpath(path)}")
         for e in data["entries"]:
+            # greeting_* vocabulary entries (dictionary headwords, some without Rohingya
+            # yet) have never been through this review; only re-review entries that have.
+            if "reference_translation" not in e or not e.get("rohingya_text"):
+                continue
             print(summary(review_entry(e, gamayun, index)))
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
